@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_dashboard"
+        android:icon="@android:drawable/ic_menu_view"
+        android:title="@string/dashboard" />
+    <item
+        android:id="@+id/menu_record"
+        android:icon="@android:drawable/ic_media_play"
+        android:title="@string/record_trip" />
+    <item
+        android:id="@+id/menu_history"
+        android:icon="@android:drawable/ic_menu_recent_history"
+        android:title="@string/trip_history" />
+    <item
+        android:id="@+id/menu_insights"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="@string/insights" />
+    <item
+        android:id="@+id/menu_profile"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:title="@string/profile" />
+</menu>

@@ -76,7 +76,7 @@
     <string name="dashboard_idle_title">Vehicle is parked</string>
     <string name="dashboard_idle_map_message">Start a drive to see the route board fill in with your GPS path.</string>
     <string name="route_preview_title">Route board</string>
-    <string name="route_preview_live">The board traces the recorded drive path without relying on an external map SDK.</string>
+    <string name="route_preview_live">Live OpenStreetMap preview of the route currently being recorded.</string>
     <string name="route_points_label">GPS points</string>
     <string name="street_map_title">Street Map</string>
     <string name="street_map_subtitle">OpenStreetMap preview for the completed drive.</string>
@@ -96,4 +96,29 @@
     <string name="profile_sync_complete_message">All recorded trips are already backed up.</string>
     <string name="profile_sync_offline_message">You are offline right now, but there are no trips waiting to sync.</string>
     <string name="sign_out">Sign out</string>
+    <string name="auth_sign_in">Sign In</string>
+    <string name="auth_create_account">Create Account</string>
+    <string name="auth_email_hint">Email</string>
+    <string name="auth_password_hint">Password</string>
+    <string name="auth_working">Working...</string>
+    <string name="auth_missing_config_message">Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` in `local.properties` before using account sign-in.</string>
+    <string name="auth_account_badge">Account</string>
+    <string name="auth_hero_title">Keep every trip ready to return.</string>
+    <string name="auth_hero_message">Sign in to sync your driving history, restore it on this device, and keep future trips tied to your account.</string>
+    <string name="auth_login_badge">Welcome Back</string>
+    <string name="auth_login_title">Get back on the road.</string>
+    <string name="auth_login_subtitle">Sign in to access your saved trips, sync history, and pick up right where you left off.</string>
+    <string name="auth_form_supporting">Use the account linked to your Drive Tracker history.</string>
+    <string name="auth_no_account_prompt">New to Drive Tracker?</string>
+    <string name="auth_open_create_account">Create one</string>
+    <string name="auth_create_badge">New Account</string>
+    <string name="auth_create_title">Create your driver profile.</string>
+    <string name="auth_create_subtitle">Set up an account to keep trip history backed up and available after you sign in.</string>
+    <string name="auth_create_form_supporting">Use an email and password you can remember for demos and testing.</string>
+    <string name="auth_existing_account_prompt">Already have an account?</string>
+    <string name="auth_open_sign_in">Sign in</string>
+    <string name="insights_summary_card">%1$s
+%2$s
+%3$s
+%4$d drives</string>
 </resources>

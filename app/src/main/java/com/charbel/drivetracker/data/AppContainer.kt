@@ -72,6 +72,7 @@ class AppContainer(context: Context) {
         OfflineFirstTripRepository(
             tripDao = database.tripDao(),
             authRepository = authRepository,
+            tripSyncService = tripSyncService,
         )
     }
 

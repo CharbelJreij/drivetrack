@@ -7,12 +7,12 @@ This project is still based on the `Driving Tracker App` proposal in `references
 The app remains aligned with the course structure:
 
 - Kotlin
-- Jetpack Compose
+- XML layouts and fragments
 - ViewModel-based UI state
 - Room persistence
 - repository pattern
 - WorkManager background sync
-- simple networking integration
+- Retrofit networking
 - OpenRouteService reverse geocoding for trip addresses
 
 ## Implemented Features
@@ -30,20 +30,21 @@ The app remains aligned with the course structure:
 
 `app/src/main/java/com/charbel/drivetracker`
 
+- `DriveTrackerApplication.kt` application setup and dependency container access
 - `data/auth/` local session storage
 - `data/local/` Room entities, DAO, and mappers
 - `data/remote/` Supabase and OpenRouteService Retrofit services and DTOs
 - `data/repository/` auth and trip repositories
 - `data/sync/` WorkManager scheduling and Supabase sync service
-- `navigation/` app routes and nav graph
 - `tracking/` GPS trip tracker
-- `ui/` Compose screens, components, theme, and ViewModels
+- `ui/` ViewModels and the shared ViewModel factory
 - `util/` formatting, analytics, time, and permission helpers
+- `view/` fragments, adapters, and custom Android views for the XML UI
 
 ## What You Need To Do
 
 1. Create a Supabase project.
-2. Run [supabase/setup.sql](</c:/Users/Charbel/Desktop/Mobile/supabase/setup.sql>) in the Supabase SQL Editor.
+2. Run [supabase/setup.sql](/d:/USJ/Year%204/Semester%202/Mobile%20Applications/Mobile/supabase/setup.sql) in the Supabase SQL Editor.
 3. In `Authentication > Providers > Email`, keep email/password enabled.
 4. For the easiest demo flow, disable `Confirm email`.
 5. Add these values to `local.properties`:
@@ -58,6 +59,8 @@ ORS_API_KEY=your_openrouteservice_api_key
 
 `ORS_API_KEY` is optional for the route board itself. The app will still render recorded routes without it, but OpenRouteService improves the saved start and end addresses.
 
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` are required for account sign-in and cloud sync. Without them, the auth screen stays in local-only mode and online account actions are disabled.
+
 ## Verification
 
 The Android app was verified with:
@@ -66,4 +69,4 @@ The Android app was verified with:
 .\gradlew.bat :app:compileDebugKotlin
 ```
 
-That compile completed successfully after the Supabase auth and sync integration.
+That compile completed successfully after the Compose cleanup and XML/fragment migration.

@@ -2,6 +2,8 @@ package com.charbel.drivetracker.data.sync
 
 import com.charbel.drivetracker.data.remote.SupabaseApiService
 import com.charbel.drivetracker.data.remote.SupabaseConfig
+import com.charbel.drivetracker.model.SyncStatus
+import com.charbel.drivetracker.model.TripPoint
 import com.charbel.drivetracker.data.remote.dto.RemoteTripInsertDto
 import com.charbel.drivetracker.data.remote.dto.RemoteTripPointInsertDto
 import com.charbel.drivetracker.data.repository.AuthRepository
@@ -16,6 +18,20 @@ sealed interface TripSyncOutcome {
     data object Retry : TripSyncOutcome
     data class PermanentFailure(val failedTripIds: List<Long>) : TripSyncOutcome
 }
+
+data class RemoteSyncedTrip(
+    val title: String,
+    val startedAtMillis: Long,
+    val endedAtMillis: Long,
+    val distanceMeters: Double,
+    val durationSeconds: Long,
+    val averageSpeedKmh: Double,
+    val maxSpeedKmh: Double,
+    val startAddress: String?,
+    val endAddress: String?,
+    val points: List<TripPoint>,
+    val syncStatus: SyncStatus = SyncStatus.SYNCED,
+)
 
 class SupabaseTripSyncService(
     private val api: SupabaseApiService,
@@ -51,6 +67,56 @@ class SupabaseTripSyncService(
             TripSyncOutcome.Retry
         } catch (_: Exception) {
             TripSyncOutcome.Retry
+        }
+    }
+
+    suspend fun fetchRemoteTrips(): List<RemoteSyncedTrip> {
+        if (!config.isConfigured) return emptyList()
+
+        val accessToken = try {
+            authRepository.getValidAccessToken()
+        } catch (_: Exception) {
+            null
+        } ?: return emptyList()
+
+        val authHeader = "Bearer $accessToken"
+
+        return try {
+            api.getTrips(authHeader = authHeader).map { remoteTrip ->
+                val points = api.getTripPoints(
+                    authHeader = authHeader,
+                    tripIdFilter = "eq.${remoteTrip.id}",
+                ).map { point ->
+                    TripPoint(
+                        latitude = point.latitude,
+                        longitude = point.longitude,
+                        recordedAtMillis = point.recordedAtMillis,
+                        speedMetersPerSecond = point.speedMetersPerSecond,
+                    )
+                }
+
+                RemoteSyncedTrip(
+                    title = remoteTrip.title,
+                    startedAtMillis = remoteTrip.startedAtMillis,
+                    endedAtMillis = remoteTrip.endedAtMillis,
+                    distanceMeters = remoteTrip.distanceMeters,
+                    durationSeconds = remoteTrip.durationSeconds,
+                    averageSpeedKmh = remoteTrip.averageSpeedKmh,
+                    maxSpeedKmh = remoteTrip.maxSpeedKmh,
+                    startAddress = remoteTrip.startAddress,
+                    endAddress = remoteTrip.endAddress,
+                    points = points,
+                )
+            }
+        } catch (exception: HttpException) {
+            if (exception.code() == 401 || exception.code() == 403) {
+                authRepository.signOut()
+            }
+            emptyList()
+        } catch (_: IOException) {
+            emptyList()
+        } catch (_: Exception) {
+            emptyList()
         }
     }
 

@@ -23,4 +23,6 @@ interface TripRepository {
     suspend fun markTripsSynced(tripIds: List<Long>, syncedAtMillis: Long)
 
     suspend fun markTripsFailed(tripIds: List<Long>)
+
+    suspend fun refreshTripsFromRemote()
 }

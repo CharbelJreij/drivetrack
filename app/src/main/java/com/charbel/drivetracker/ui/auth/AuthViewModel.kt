@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 data class AuthUiState(
     val mode: AuthSubmitMode = AuthSubmitMode.SIGN_IN,
@@ -47,6 +50,16 @@ class AuthViewModel(
                 message = null,
             )
         }
+    }
+
+    fun signIn() {
+        setMode(AuthSubmitMode.SIGN_IN)
+        submit()
+    }
+
+    fun signUp() {
+        setMode(AuthSubmitMode.SIGN_UP)
+        submit()
     }
 
     fun dismissMessage() {
@@ -110,10 +123,22 @@ class AuthViewModel(
                 state.update { current ->
                     current.copy(
                         isLoading = false,
-                        message = error.message ?: "Authentication failed.",
+                        message = error.toUserMessage(),
                     )
                 }
             }
         }
+    }
+
+    private fun Throwable.toUserMessage(): String = when (this) {
+        is SocketTimeoutException -> "Sign-in timed out. Check the internet connection and try again."
+        is UnknownHostException -> "Could not reach Supabase. Check the internet connection and project URL."
+        is HttpException -> when (code()) {
+            400, 401 -> "Invalid email or password."
+            422 -> "Please check the email format and password, then try again."
+            else -> message()
+        } ?: "Authentication failed."
+
+        else -> message ?: "Authentication failed."
     }
 }

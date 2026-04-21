@@ -6,7 +6,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.charbel.drivetracker.DriveTrackerApplication
-import com.charbel.drivetracker.navigation.TripDetailDestination
 import com.charbel.drivetracker.ui.auth.AuthViewModel
 import com.charbel.drivetracker.ui.dashboard.HomeViewModel
 import com.charbel.drivetracker.ui.history.HistoryViewModel
@@ -14,6 +13,7 @@ import com.charbel.drivetracker.ui.insights.InsightsViewModel
 import com.charbel.drivetracker.ui.profile.ProfileViewModel
 import com.charbel.drivetracker.ui.record.RecordTripViewModel
 import com.charbel.drivetracker.ui.tripdetail.TripDetailViewModel
+import com.charbel.drivetracker.view.tripdetail.TripDetailFragment
 
 object AppViewModelProvider {
     val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -38,7 +38,7 @@ object AppViewModelProvider {
         }
 
         initializer {
-            val tripId = createSavedStateHandle().get<Long>(TripDetailDestination.tripIdArg) ?: 0L
+            val tripId = createSavedStateHandle().get<Long>(TripDetailFragment.TRIP_ID_ARG) ?: 0L
             TripDetailViewModel(
                 tripId = tripId,
                 tripRepository = driveTrackerApplication().container.tripRepository,

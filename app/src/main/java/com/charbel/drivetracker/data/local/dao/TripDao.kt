@@ -87,6 +87,24 @@ interface TripDao {
         return tripId
     }
 
+    @Query(
+        """
+        SELECT id
+        FROM trips
+        WHERE ownerUserId = :ownerUserId
+          AND startedAtMillis = :startedAtMillis
+          AND endedAtMillis = :endedAtMillis
+          AND durationSeconds = :durationSeconds
+        LIMIT 1
+        """,
+    )
+    suspend fun findTripIdByImportSignature(
+        ownerUserId: String,
+        startedAtMillis: Long,
+        endedAtMillis: Long,
+        durationSeconds: Long,
+    ): Long?
+
     @Transaction
     @Query("SELECT * FROM trips WHERE ownerUserId = :ownerUserId AND syncStatus = :status ORDER BY startedAtMillis ASC")
     suspend fun getTripsBySyncStatus(

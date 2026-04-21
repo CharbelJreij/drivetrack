@@ -1,6 +1,8 @@
 package com.charbel.drivetracker.data.repository
 
 import com.charbel.drivetracker.data.local.dao.TripDao
+import com.charbel.drivetracker.data.local.entity.TripEntity
+import com.charbel.drivetracker.data.local.entity.TripPointEntity
 import com.charbel.drivetracker.data.local.entity.TripWithPoints
 import com.charbel.drivetracker.data.local.mapper.toModel
 import com.charbel.drivetracker.data.local.mapper.toPointEntities
@@ -8,6 +10,8 @@ import com.charbel.drivetracker.data.local.mapper.toTripEntity
 import com.charbel.drivetracker.model.SyncStatus
 import com.charbel.drivetracker.model.Trip
 import com.charbel.drivetracker.model.TripDraft
+import com.charbel.drivetracker.data.sync.SupabaseTripSyncService
+import com.charbel.drivetracker.data.sync.RemoteSyncedTrip
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -18,6 +22,7 @@ import kotlinx.coroutines.flow.map
 class OfflineFirstTripRepository(
     private val tripDao: TripDao,
     private val authRepository: AuthRepository,
+    private val tripSyncService: SupabaseTripSyncService,
 ) : TripRepository {
 
     private fun currentUserIdOrNull(): String? = authRepository.session.value?.userId
@@ -126,5 +131,59 @@ class OfflineFirstTripRepository(
                 ownerUserId = ownerUserId,
             )
         }
+    }
+
+    override suspend fun refreshTripsFromRemote() {
+        val ownerUserId = currentUserIdOrNull() ?: return
+        val remoteTrips = tripSyncService.fetchRemoteTrips()
+        if (remoteTrips.isEmpty()) return
+
+        val syncedAtMillis = System.currentTimeMillis()
+        remoteTrips.forEach { trip ->
+            val existingTripId = tripDao.findTripIdByImportSignature(
+                ownerUserId = ownerUserId,
+                startedAtMillis = trip.startedAtMillis,
+                endedAtMillis = trip.endedAtMillis,
+                durationSeconds = trip.durationSeconds,
+            )
+            if (existingTripId == null) {
+                tripDao.insertTripWithPoints(
+                    trip = trip.toTripEntity(
+                        ownerUserId = ownerUserId,
+                        syncedAtMillis = syncedAtMillis,
+                    ),
+                    points = trip.toPointEntities(),
+                )
+            }
+        }
+    }
+
+    private fun RemoteSyncedTrip.toTripEntity(
+        ownerUserId: String,
+        syncedAtMillis: Long,
+    ): TripEntity = TripEntity(
+        ownerUserId = ownerUserId,
+        title = title,
+        startedAtMillis = startedAtMillis,
+        endedAtMillis = endedAtMillis,
+        distanceMeters = distanceMeters,
+        durationSeconds = durationSeconds,
+        averageSpeedKmh = averageSpeedKmh,
+        maxSpeedKmh = maxSpeedKmh,
+        startAddress = startAddress,
+        endAddress = endAddress,
+        syncStatus = syncStatus,
+        syncedAtMillis = syncedAtMillis,
+    )
+
+    private fun RemoteSyncedTrip.toPointEntities(): List<TripPointEntity> = points.mapIndexed { index, point ->
+        TripPointEntity(
+            tripId = 0L,
+            latitude = point.latitude,
+            longitude = point.longitude,
+            recordedAtMillis = point.recordedAtMillis,
+            speedMetersPerSecond = point.speedMetersPerSecond,
+            sequenceIndex = index,
+        )
     }
 }
